@@ -305,7 +305,6 @@ html[data-tema="escuro"] .item-lista.ativo {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  position: relative;
 }
 
 .item-arquivo .icone svg {

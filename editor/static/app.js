@@ -883,44 +883,24 @@ function renderizarArquivos(itens) {
       });
       acoes.appendChild(btnBaixar);
 
-      const protegido = !pastaAtual && ARQUIVOS_PROTEGIDOS.includes(item.nome);
-      if (protegido) {
-        li.classList.add("protegido");
-        const cadeado = document.createElement("span");
-        cadeado.className = "cadeado-protegido";
-        cadeado.innerHTML = SVG_CADEADO;
-        cadeado.title = "Arquivo protegido: não pode ser renomeado ou deletado";
-        icone.appendChild(cadeado);
-      }
-
       const btnRenomear = document.createElement("button");
       btnRenomear.type = "button";
       btnRenomear.className = "btn-menu";
       btnRenomear.textContent = "Renomear";
-      if (protegido) {
-        btnRenomear.disabled = true;
-        btnRenomear.title = "Arquivo protegido";
-      } else {
-        btnRenomear.addEventListener("click", (e) => {
-          e.stopPropagation();
-          renomearItem(item.caminho);
-        });
-      }
+      btnRenomear.addEventListener("click", (e) => {
+        e.stopPropagation();
+        renomearItem(item.caminho);
+      });
       acoes.appendChild(btnRenomear);
 
       const btnDeletar = document.createElement("button");
       btnDeletar.type = "button";
       btnDeletar.className = "btn-menu deletar";
       btnDeletar.textContent = "Deletar";
-      if (protegido) {
-        btnDeletar.disabled = true;
-        btnDeletar.title = "Arquivo protegido";
-      } else {
-        btnDeletar.addEventListener("click", (e) => {
-          e.stopPropagation();
-          deletarItem(item.caminho, item.tipo);
-        });
-      }
+      btnDeletar.addEventListener("click", (e) => {
+        e.stopPropagation();
+        deletarItem(item.caminho, item.tipo);
+      });
       acoes.appendChild(btnDeletar);
     }
 
@@ -1387,13 +1367,3 @@ document.addEventListener("keydown", (e) => {
     fecharModalPrompt();
   }
 });
-
-const btnToggleArquivos = document.getElementById("btn-toggle-arquivos");
-if (btnToggleArquivos) {
-  btnToggleArquivos.addEventListener("click", () => {
-    const oculto = painelArquivos.classList.toggle("oculto");
-    btnToggleArquivos.textContent = oculto ? "☰" : "✕";
-    btnToggleArquivos.title = oculto ? "Mostrar painel de arquivos" : "Ocultar painel de arquivos";
-    editor.refresh();
-  });
-}
