@@ -74,7 +74,7 @@ body {
   width: 48px;
   min-width: 48px;
   padding: 16px 8px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 #lateral.oculto h1,
@@ -88,6 +88,18 @@ body {
 
 #lateral.oculto .lateral-header {
   justify-content: center;
+  height: auto;
+  min-height: 36px;
+}
+
+#lateral.oculto #btn-toggle-lateral {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  flex-shrink: 0;
 }
 
 
