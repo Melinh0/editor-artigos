@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-tema="escuro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Editor de Artigos</title>
+  <script>
+    try {
+      var t = localStorage.getItem("tema");
+      if (!t) {
+        t = window.matchMedia("(prefers-color-scheme: light)").matches ? "claro" : "escuro";
+      }
+      document.documentElement.dataset.tema = t;
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="/static/vendor/codemirror.min.css">
+  <link rel="stylesheet" href="/static/vendor/material-darker.min.css">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <aside id="lateral">
+    <header>
+      <h1>Editor de Artigos</h1>
+      <p id="resumo-status">carregando…</p>
+      <button id="btn-tema" class="botao" type="button">Tema: escuro</button>
+    </header>
+    <button id="btn-novo" class="botao primario" type="button">+ Novo artigo</button>
+    <ul id="lista-artigos"></ul>
+
+    <section id="painel-arquivos" class="oculto">
+      <header class="cabecalho-arquivos">
+        <div class="caminho-arquivos" id="caminho-arquivos">Artigo</div>
+        <div class="acoes-arquivos">
+          <button id="btn-voltar-pasta" class="botao" type="button" title="Voltar">Voltar</button>
+          <button id="btn-nova-pasta" class="botao" type="button" title="Nova pasta">Nova pasta</button>
+          <button id="btn-upload-arquivo" class="botao primario" type="button" title="Enviar arquivo">Enviar arquivo</button>
+          <input id="input-upload-arquivo" type="file" class="oculto" multiple>
+        </div>
+      </header>
+      <ul id="lista-arquivos"></ul>
+      <p id="msg-vazio-arquivos" class="oculto">Nenhum arquivo.</p>
+    </section>
+  </aside>
+
+  <div id="divisor-lateral" class="divisor" role="separator" aria-orientation="vertical"
+       aria-label="Redimensionar a lista de artigos" tabindex="0"
+       title="Arraste para redimensionar · duplo clique restaura"></div>
+
+  <main>
+    <header id="barra">
+      <span id="artigo-atual">Nenhum artigo aberto</span>
+      <div class="acoes">
+        <span id="indicador" class="oculto"></span>
+        <button id="btn-salvar" class="botao" type="button" disabled>Salvar</button>
+        <button id="btn-compilar" class="botao primario" type="button" disabled>Compilar</button>
+        <button id="btn-deletar-artigo" class="botao" type="button" style="background: var(--erro); border-color: var(--erro);" disabled>Deletar artigo</button>
+        <button id="btn-previa" class="botao oculto" type="button">Prévia</button>
+      </div>
+    </header>
+
+    <div id="area-principal">
+      <section id="editor"></section>
+
+      <div id="divisor-previa" class="divisor oculto" role="separator" aria-orientation="vertical"
+           aria-label="Redimensionar a prévia do PDF" tabindex="0"
+           title="Arraste para redimensionar · duplo clique restaura"></div>
+
+      <aside id="painel-previa" class="oculto">
+        <div class="cabecalho-previa">
+          <div class="titulo-previa">
+            <strong>PDF compilado</strong>
+            <span id="info-pdf" class="info-pdf"></span>
+            <span class="dica-sync" title="Clique no PDF para ir ao texto; clique no texto para ir ao PDF">PDF ↔ texto</span>
+          </div>
+          <div class="controles-previa">
+            <div class="zoom-pdf" role="group" aria-label="Zoom da prévia do PDF">
+              <button id="btn-zoom-menos" class="botao segmentado" type="button" aria-label="Diminuir zoom">−</button>
+              <button id="btn-zoom-ajustar" class="botao segmentado ativo" type="button"
+                      title="Ajustar as páginas à largura do painel">Ajustar</button>
+              <button id="btn-zoom-mais" class="botao segmentado" type="button" aria-label="Aumentar zoom">+</button>
+            </div>
+            <div class="tema-pdf" role="group" aria-label="Tema da prévia do PDF">
+              <span class="rotulo-tema-pdf">PDF:</span>
+              <button id="btn-pdf-claro" class="botao segmentado" type="button">Claro</button>
+              <button id="btn-pdf-escuro" class="botao segmentado" type="button">Escuro</button>
+            </div>
+          </div>
+          <div class="acoes">
+            <a id="btn-baixar" class="botao" href="#">Baixar PDF</a>
+            <button id="btn-fechar-previa" class="botao" type="button">Fechar</button>
+          </div>
+        </div>
+        <div id="visualizador-pdf" tabindex="0"
+             aria-label="Pré-visualização do PDF compilado; clique para ir ao texto correspondente">
+          <p id="estado-pdf" class="estado-pdf">Compile o artigo para ver o PDF aqui.</p>
+          <div id="paginas-pdf" class="paginas-pdf"></div>
+        </div>
+      </aside>
+    </div>
+
+    <section id="painel-log" class="oculto" aria-live="polite">
+      <div class="cabecalho-log">
+        <strong>Saída da compilação</strong>
+        <button id="btn-fechar-log" class="botao" type="button">Fechar</button>
+      </div>
+      <pre id="log"></pre>
+    </section>
+  </main>
+
+  <div id="modal-novo" class="oculto">
+    <div class="caixa-modal">
+      <h2>Novo artigo</h2>
+      <label for="novo-modelo">Modelo do artigo</label>
+      <select id="novo-modelo"></select>
+      <label for="novo-slug">Slug (letras minúsculas e hífens)</label>
+      <input id="novo-slug" type="text" placeholder="01-nome-do-artigo" autocomplete="off">
+      <label for="novo-titulo">Título</label>
+      <input id="novo-titulo" type="text" placeholder="Título do artigo" autocomplete="off">
+      <p id="erro-novo" class="erro oculto"></p>
+      <div class="acoes-modal">
+        <button id="btn-cancelar-novo" class="botao" type="button">Cancelar</button>
+        <button id="btn-criar-novo" class="botao primario" type="button">Criar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/vendor/codemirror.min.js"></script>
+  <script src="/static/vendor/stex.min.js"></script>
+  <script src="/static/vendor/pdf.min.js"></script>
+  <script src="/static/app.js" onload="document.getElementById('resumo-status').textContent = 'app.js carregado com sucesso!';" onerror="document.getElementById('resumo-status').textContent = 'ERRO ao carregar app.js';"></script>
+
+  <div id="modal-imagem" class="oculto">
+    <div class="caixa-modal" style="width: 70vw; max-width: 90vw; max-height: 90vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <strong id="titulo-imagem-modal">Imagem</strong>
+        <button id="btn-fechar-imagem" class="botao" type="button">Fechar</button>
+        <a id="btn-baixar-imagem" class="botao primario" href="#" target="_blank" style="margin-left: 8px;">Baixar</a>
+      </div>
+      <div id="visualizacao-imagem-modal" style="max-height: 70vh; overflow: auto; text-align: center; border: 1px solid var(--borda); border-radius: 6px; padding: 12px; background: var(--fundo-3);">
+        <img id="imagem-modal" src="" style="max-width: 100%; max-height: 60vh; display: block; margin: 0 auto;">
+        <p id="info-imagem-modal" class="tamanho-arquivo" style="margin-top: 8px;"></p>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "nome": "wpmc-2026",
+  "descricao": "Modelo para submissao ao WPMC 2026, baseado na classe IEEEtran.",
+  "classe": "IEEEtran.cls",
+  "arquivo_fonte": "novo-artigo.tex",
+  "marcadores": [
+    {
+      "nome": "TITULO",
+      "descricao": "Titulo do artigo"
+    },
+    {
+      "nome": "AUTORES",
+      "descricao": "Lista de autores no formato IEEEtran"
+    }
+  ]
+}
