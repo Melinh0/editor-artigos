@@ -86,49 +86,6 @@ body {
   display: none;
 }
 
-#lateral.oculto .lateral-header {
-  justify-content: center;
-  height: auto;
-  min-height: 36px;
-}
-
-#lateral.oculto #btn-toggle-lateral {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  flex-shrink: 0;
-  background: var(--fundo-3);
-  border: 1px solid var(--borda);
-  border-radius: 6px;
-  color: var(--texto);
-  font-size: 14px;
-  line-height: 1;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-#lateral.oculto .lateral-header {
-  justify-content: center;
-  height: auto;
-  min-height: 36px;
-  display: flex !important;
-  align-items: center;
-}
-
-#lateral header {
-  display: flex !important;
-  flex-direction: column;
-  gap: 8px;
-}
-
-#lateral.oculto header {
-  padding: 8px 0;
-}
-
-
 .divisor {
   flex: 0 0 7px;
   position: relative;
@@ -174,13 +131,6 @@ body.redimensionando {
   color: var(--texto-forte);
 }
 
-#btn-toggle-lateral {
-  padding: 2px 8px;
-  font-size: 12px;
-  line-height: 1;
-  flex-shrink: 0;
-}
-
 #resumo-status {
   margin: 4px 0 8px;
   font-size: 12px;
@@ -191,6 +141,35 @@ body.redimensionando {
   align-self: flex-start;
   padding: 4px 10px;
   font-size: 12px;
+}
+
+/* Header bar toggle button */
+.barra-esquerda {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#btn-toggle-lateral {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+  background: var(--fundo-3);
+  border: 1px solid var(--borda);
+  color: var(--texto);
+}
+
+#btn-toggle-lateral:hover:not(:disabled) {
+  background: var(--fundo-2);
+  border-color: var(--acento);
+  color: var(--texto-forte);
 }
 
 #lista-artigos {

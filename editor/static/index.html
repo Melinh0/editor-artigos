@@ -20,10 +20,7 @@
 <body>
   <aside id="lateral">
     <header>
-      <div class="lateral-header">
-        <h1>Editor de Artigos</h1>
-        <button id="btn-toggle-lateral" class="botao" type="button" title="Ocultar painel lateral">✕</button>
-      </div>
+      <h1>Editor de Artigos</h1>
       <p id="resumo-status">carregando…</p>
       <button id="btn-tema" class="botao" type="button">Tema: escuro</button>
     </header>
@@ -61,7 +58,10 @@
 
   <main>
     <header id="barra">
-      <span id="artigo-atual">Nenhum artigo aberto</span>
+      <div class="barra-esquerda">
+        <button id="btn-toggle-lateral" class="botao" type="button" title="Alternar painel lateral">☰</button>
+        <span id="artigo-atual">Nenhum artigo aberto</span>
+      </div>
       <div class="acoes">
         <span id="indicador" class="oculto"></span>
         <button id="btn-salvar" class="botao" type="button" disabled>Salvar</button>
