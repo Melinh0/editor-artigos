@@ -99,10 +99,10 @@ def _resolver_caminho_seguro(
     return alvo
 
 
-def _listar_arquivos(pasta: Path) -> list[dict]:
+def _listar_arquivos(pasta: Path, prefixo: str = "") -> list[dict]:
     itens: list[dict] = []
     for entrada in sorted(pasta.iterdir(), key=lambda p: (not p.is_dir(), p.name.lower())):
-        rel = entrada.name
+        rel = f"{prefixo}{entrada.name}"
         try:
             stat = entrada.stat()
         except OSError:
@@ -257,7 +257,7 @@ def baixar_ou_listar(evento: str, ano: str, slug: str, caminho: str):
     if not alvo.exists():
         raise HTTPException(status_code=404, detail="Arquivo ou pasta nao encontrado.")
     if alvo.is_dir():
-        return _listar_arquivos(alvo)
+        return _listar_arquivos(alvo, prefixo=f"{caminho.rstrip('/')}/")
     return FileResponse(
         alvo,
         filename=alvo.name,
@@ -265,17 +265,23 @@ def baixar_ou_listar(evento: str, ano: str, slug: str, caminho: str):
     )
 
 
-@app.put("/api/artigos/{evento}/{ano}/{slug}/files/{caminho:path}")
-async def upload_arquivo(
-    evento: str, ano: str, slug: str, caminho: str, arquivo: UploadFile = File(...)
+async def _salvar_upload(
+    evento: str, ano: str, slug: str, caminho: str, arquivo: UploadFile
 ) -> dict:
     _validar_evento_ano(evento, ano)
     _validar_slug(slug)
     alvo = _resolver_caminho_seguro(evento, ano, slug, caminho)
+    if not caminho or alvo.is_dir():
+        nome = Path(arquivo.filename or "").name
+        if not nome:
+            raise HTTPException(status_code=400, detail="Nome de arquivo invalido.")
+        alvo = alvo / nome
     if alvo.name in ARQUIVOS_PROTEGIDOS and alvo.parent == _caminho_pasta_artigo(
         evento, ano, slug
     ).resolve():
-        pass
+        raise HTTPException(
+            status_code=403, detail="Arquivo protegido nao pode ser sobrescrito via upload."
+        )
     alvo.parent.mkdir(parents=True, exist_ok=True)
     conteudo = await arquivo.read()
     if alvo.suffix.lower() in {".tex", ".bib", ".json", ".txt", ".md", ".cls", ".bst", ".sty"}:
@@ -290,7 +296,22 @@ async def upload_arquivo(
     else:
         with open(alvo, "wb") as f:
             f.write(conteudo)
-    return {"ok": True, "caminho": caminho}
+    raiz = _caminho_pasta_artigo(evento, ano, slug).resolve()
+    return {"ok": True, "caminho": str(alvo.relative_to(raiz))}
+
+
+@app.put("/api/artigos/{evento}/{ano}/{slug}/files")
+async def upload_arquivo_raiz(
+    evento: str, ano: str, slug: str, arquivo: UploadFile = File(...)
+) -> dict:
+    return await _salvar_upload(evento, ano, slug, "", arquivo)
+
+
+@app.put("/api/artigos/{evento}/{ano}/{slug}/files/{caminho:path}")
+async def upload_arquivo(
+    evento: str, ano: str, slug: str, caminho: str, arquivo: UploadFile = File(...)
+) -> dict:
+    return await _salvar_upload(evento, ano, slug, caminho, arquivo)
 
 
 @app.post("/api/artigos/{evento}/{ano}/{slug}/files")
@@ -402,8 +423,9 @@ def criar_artigo(artigo: ArtigoNovo) -> dict:
     with open(arquivo_modelo, "r", encoding="utf-8") as f:
         conteudo_modelo = f.read()
 
-    autores_placeholder = "\\\\and\\\\".join(["\\\\IEEEauthorblockN{Nome}\\\\n\\\\IEEEauthorblockA{Instituicao \\\\email}"] * 1)
-    conteudo = conteudo_modelo.replace("{TITULO}", titulo).replace("{AUTORES}", "\\\\IEEEauthorblockN{Nome do autor}\\\\n\\\\IEEEauthorblockA{Instituicao \\\\email}")
+    conteudo = conteudo_modelo.replace("{TITULO}", titulo).replace(
+        "{AUTORES}", "Nome do autor \\\\ Universidade"
+    )
 
     destino.parent.mkdir(parents=True, exist_ok=True)
     _escrever_texto(destino, conteudo)

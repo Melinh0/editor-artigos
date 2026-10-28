@@ -29,16 +29,24 @@
 
     <section id="painel-arquivos" class="oculto">
       <header class="cabecalho-arquivos">
-        <div class="caminho-arquivos" id="caminho-arquivos">Artigo</div>
+        <div class="breadcrumb-arquivos" id="breadcrumb-arquivos">Artigo</div>
+        <div class="busca-arquivos">
+          <input type="text" id="busca-arquivos" placeholder="Buscar arquivos...">
+        </div>
         <div class="acoes-arquivos">
-          <button id="btn-voltar-pasta" class="botao" type="button" title="Voltar">Voltar</button>
-          <button id="btn-nova-pasta" class="botao" type="button" title="Nova pasta">Nova pasta</button>
-          <button id="btn-upload-arquivo" class="botao primario" type="button" title="Enviar arquivo">Enviar arquivo</button>
+          <button id="btn-voltar-pasta" class="botao" disabled>Voltar</button>
+          <button id="btn-nova-pasta" class="botao">Nova pasta</button>
+          <button id="btn-upload-arquivo" class="botao primario">Enviar arquivo</button>
           <input id="input-upload-arquivo" type="file" class="oculto" multiple>
         </div>
       </header>
+
+      <div class="drop-zone" id="drop-zone">
+        <p>Solte os arquivos aqui para fazer upload</p>
+      </div>
+
       <ul id="lista-arquivos"></ul>
-      <p id="msg-vazio-arquivos" class="oculto">Nenhum arquivo.</p>
+      <p id="msg-vazio-arquivos" class="oculto">Nenhum arquivo encontrado.</p>
     </section>
   </aside>
 
@@ -124,24 +132,53 @@
     </div>
   </div>
 
+  <div id="modal-imagem" class="oculto">
+    <div class="caixa-modal">
+      <div class="cabecalho-modal">
+        <strong id="titulo-imagem-modal">Imagem</strong>
+        <div class="acoes">
+          <a id="btn-baixar-imagem" class="botao primario" href="#" target="_blank" rel="noopener">Baixar</a>
+          <button id="btn-fechar-imagem" class="botao" type="button">Fechar</button>
+        </div>
+      </div>
+      <div class="corpo-modal">
+        <img id="imagem-modal" src="" alt="">
+        <p id="info-imagem-modal"></p>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-modal" class="oculto">
+    <div class="caixa-modal">
+      <h3 id="modal-titulo">Confirmação</h3>
+      <div class="corpo-modal">
+        <p id="modal-mensagem"></p>
+        <div class="acoes-modal">
+          <button id="modal-cancelar" class="botao" type="button">Cancelar</button>
+          <button id="modal-confirmar" class="botao perigo" type="button">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-prompt" class="oculto">
+    <div class="caixa-modal">
+      <h3 id="prompt-titulo">Digite o nome</h3>
+      <div class="corpo-modal">
+        <p id="prompt-mensagem"></p>
+        <input id="prompt-valor" class="input-prompt" type="text" autocomplete="off">
+        <div class="acoes-modal">
+          <button id="prompt-cancelar" class="botao" type="button">Cancelar</button>
+          <button id="prompt-confirmar" class="botao primario" type="button">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="/static/vendor/codemirror.min.js"></script>
   <script src="/static/vendor/stex.min.js"></script>
   <script src="/static/vendor/pdf.min.js"></script>
   <script src="/static/app.js" onload="document.getElementById('resumo-status').textContent = 'app.js carregado com sucesso!';" onerror="document.getElementById('resumo-status').textContent = 'ERRO ao carregar app.js';"></script>
-
-  <div id="modal-imagem" class="oculto">
-    <div class="caixa-modal" style="width: 70vw; max-width: 90vw; max-height: 90vh; overflow-y: auto;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-        <strong id="titulo-imagem-modal">Imagem</strong>
-        <button id="btn-fechar-imagem" class="botao" type="button">Fechar</button>
-        <a id="btn-baixar-imagem" class="botao primario" href="#" target="_blank" style="margin-left: 8px;">Baixar</a>
-      </div>
-      <div id="visualizacao-imagem-modal" style="max-height: 70vh; overflow: auto; text-align: center; border: 1px solid var(--borda); border-radius: 6px; padding: 12px; background: var(--fundo-3);">
-        <img id="imagem-modal" src="" style="max-width: 100%; max-height: 60vh; display: block; margin: 0 auto;">
-        <p id="info-imagem-modal" class="tamanho-arquivo" style="margin-top: 8px;"></p>
-      </div>
-    </div>
-  </div>
 
 </body>
 </html>

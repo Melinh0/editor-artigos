@@ -18,6 +18,7 @@ const btnSalvar = document.getElementById("btn-salvar");
 const btnCompilar = document.getElementById("btn-compilar");
 const btnPrevia = document.getElementById("btn-previa");
 const btnTema = document.getElementById("btn-tema");
+const btnDeletarArtigoEl = document.getElementById("btn-deletar-artigo");
 const painelPrevia = document.getElementById("painel-previa");
 const divisores = {
   lateral: document.getElementById("divisor-lateral"),
@@ -59,6 +60,85 @@ let timerDestaquePdf = null;
 let timerDestaqueLinha = null;
 let linhaDestaque = null;
 let sincronizando = false;
+
+// Painel de arquivos
+const painelArquivos = document.getElementById("painel-arquivos");
+const listaArquivos = document.getElementById("lista-arquivos");
+const msgVazioArquivos = document.getElementById("msg-vazio-arquivos");
+const btnNovaPasta = document.getElementById("btn-nova-pasta");
+const btnUploadArquivo = document.getElementById("btn-upload-arquivo");
+const inputUploadArquivo = document.getElementById("input-upload-arquivo");
+const btnVoltarPasta = document.getElementById("btn-voltar-pasta");
+const caminhoArquivosEl = document.getElementById("breadcrumb-arquivos");
+const buscaArquivosEl = document.getElementById("busca-arquivos");
+const dropZoneEl = document.getElementById("drop-zone");
+
+const modalImagem = document.getElementById("modal-imagem");
+const btnFecharImagem = document.getElementById("btn-fechar-imagem");
+const imagemModal = document.getElementById("imagem-modal");
+const infoImagemModal = document.getElementById("info-imagem-modal");
+const btnBaixarImagem = document.getElementById("btn-baixar-imagem");
+const tituloImagemModal = document.getElementById("titulo-imagem-modal");
+
+// Modais customizados (substituem confirm() e prompt() nativos)
+const modalConfirmar = document.getElementById("modal-modal");
+const btnConfirmar = document.getElementById("modal-confirmar");
+const btnCancelarConfirmar = document.getElementById("modal-cancelar");
+const modalTitulo = document.getElementById("modal-titulo");
+const modalMensagem = document.getElementById("modal-mensagem");
+
+const modalPrompt = document.getElementById("modal-prompt");
+const btnConfirmarPrompt = document.getElementById("prompt-confirmar");
+const btnCancelarPrompt = document.getElementById("prompt-cancelar");
+const promptTitulo = document.getElementById("prompt-titulo");
+const promptMensagem = document.getElementById("prompt-mensagem");
+const promptValor = document.getElementById("prompt-valor");
+
+let pastaAtual = null;
+let historicoPastas = [];
+let todosArquivos = [];
+
+let confirmResolve = null;
+let promptResolve = null;
+let urlImagemAtual = null;
+
+const ARQUIVOS_PROTEGIDOS = ["artigo.tex", "artigo.meta.json"];
+
+const SVG_PASTA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>';
+const SVG_TEXTO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>';
+const SVG_IMAGEM = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></svg>';
+const SVG_OUTRO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>';
+
+function mostrarConfirmar(titulo, mensagem) {
+  return new Promise((resolve) => {
+    confirmResolve = resolve;
+    modalTitulo.textContent = titulo || "Confirmação";
+    modalMensagem.textContent = mensagem;
+    modalConfirmar.classList.remove("oculto");
+  });
+}
+
+function mostrarPrompt(titulo, mensagem, valorPadrao = "") {
+  return new Promise((resolve) => {
+    promptResolve = resolve;
+    promptTitulo.textContent = titulo || "Digite o nome";
+    promptMensagem.textContent = mensagem || "";
+    promptValor.value = valorPadrao;
+    modalPrompt.classList.remove("oculto");
+    promptValor.focus();
+    promptValor.select();
+  });
+}
+
+function fecharModalConfirmar() {
+  modalConfirmar.classList.add("oculto");
+  confirmResolve = null;
+}
+
+function fecharModalPrompt() {
+  modalPrompt.classList.add("oculto");
+  promptResolve = null;
+}
 
 async function api(caminho, opcoes = {}) {
   const resposta = await fetch(caminho, {
@@ -651,8 +731,332 @@ function marcarAtivo() {
   });
 }
 
+function resetarNavegacaoArquivos() {
+  pastaAtual = null;
+  historicoPastas = [];
+}
+
+function urlArquivos(caminhoRelativo = "") {
+  const base = `/api/artigos/${eventoAtual}/${anoAtual}/${slugAtual}/files`;
+  return caminhoRelativo ? `${base}/${caminhoRelativo}` : base;
+}
+
+function atualizarBreadcrumb() {
+  if (!caminhoArquivosEl) return;
+  caminhoArquivosEl.innerHTML = "";
+  const raiz = document.createElement("button");
+  raiz.type = "button";
+  raiz.className = "trecho-breadcrumb";
+  raiz.textContent = "Artigo";
+  raiz.addEventListener("click", () => navegarPara(""));
+  caminhoArquivosEl.appendChild(raiz);
+  if (pastaAtual) {
+    const partes = pastaAtual.split("/");
+    partes.forEach((parte, indice) => {
+      const separador = document.createElement("span");
+      separador.className = "separador-breadcrumb";
+      separador.textContent = "/";
+      caminhoArquivosEl.appendChild(separador);
+      const trecho = document.createElement("button");
+      trecho.type = "button";
+      trecho.className = "trecho-breadcrumb";
+      trecho.textContent = parte;
+      if (indice === partes.length - 1) trecho.classList.add("atual");
+      trecho.addEventListener("click", () => navegarPara(partes.slice(0, indice + 1).join("/")));
+      caminhoArquivosEl.appendChild(trecho);
+    });
+  }
+  if (btnVoltarPasta) btnVoltarPasta.disabled = historicoPastas.length === 0;
+}
+
+function navegarPara(caminho) {
+  if ((pastaAtual || "") === caminho) return;
+  historicoPastas.push(pastaAtual);
+  pastaAtual = caminho || null;
+  carregarArquivos();
+}
+
+function filtrarArquivos() {
+  const termo = (buscaArquivosEl ? buscaArquivosEl.value : "").trim().toLowerCase();
+  if (!termo) {
+    renderizarArquivos(todosArquivos);
+    return;
+  }
+  renderizarArquivos(todosArquivos.filter((item) => item.nome.toLowerCase().includes(termo)));
+}
+
+async function carregarArquivos() {
+  if (!slugAtual) {
+    if (painelArquivos) painelArquivos.classList.add("oculto");
+    return;
+  }
+  try {
+    const itens = await api(urlArquivos(pastaAtual || ""));
+    todosArquivos = itens;
+    filtrarArquivos();
+    atualizarBreadcrumb();
+  } catch (e) {
+    indicador("");
+    alert(e.message);
+  }
+}
+
+function renderizarArquivos(itens) {
+  if (!listaArquivos) return;
+  listaArquivos.innerHTML = "";
+  if (msgVazioArquivos) msgVazioArquivos.classList.toggle("oculto", itens.length > 0);
+
+  for (const item of itens) {
+    const li = document.createElement("li");
+    li.className = "item-arquivo";
+
+    const tipo = item.tipo === "pasta" ? "pasta" : (["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(item.nome.toLowerCase().split(".").pop()) ? "imagem" : (esTipoTexto(item.nome) ? "texto" : "outro"));
+
+    const icone = document.createElement("span");
+    icone.className = `icone icone-${tipo}`;
+    icone.innerHTML = tipo === "pasta" ? SVG_PASTA : tipo === "imagem" ? SVG_IMAGEM : tipo === "texto" ? SVG_TEXTO : SVG_OUTRO;
+
+    const info = document.createElement("div");
+    info.className = "info-arquivo";
+
+    const nome = document.createElement("span");
+    nome.className = "nome-arquivo";
+    nome.textContent = item.nome;
+
+    const meta = document.createElement("span");
+    meta.className = "meta-arquivo";
+    if (item.tipo === "pasta") {
+      meta.textContent = "pasta";
+    } else {
+      const kb = (item.tamanho / 1024).toFixed(1);
+      meta.textContent = `${kb} KB`;
+    }
+
+    info.append(icone, nome, meta);
+
+    const acoes = document.createElement("div");
+    acoes.className = "acoes-item";
+
+    if (item.tipo === "pasta") {
+      const btnAbrir = document.createElement("button");
+      btnAbrir.type = "button";
+      btnAbrir.className = "btn-menu";
+      btnAbrir.textContent = "Abrir";
+      btnAbrir.addEventListener("click", (e) => {
+        e.stopPropagation();
+        historicoPastas.push(pastaAtual);
+        pastaAtual = item.caminho;
+        carregarArquivos();
+      });
+      acoes.appendChild(btnAbrir);
+    } else {
+      if (tipo === "texto") {
+        const btnEditar = document.createElement("button");
+        btnEditar.type = "button";
+        btnEditar.className = "btn-menu";
+        btnEditar.textContent = "Editar";
+        btnEditar.addEventListener("click", (e) => {
+          e.stopPropagation();
+          editarArquivoTexto(item.caminho);
+        });
+        acoes.appendChild(btnEditar);
+      } else if (tipo === "imagem") {
+        const btnVer = document.createElement("button");
+        btnVer.type = "button";
+        btnVer.className = "btn-menu";
+        btnVer.textContent = "Visualizar";
+        btnVer.addEventListener("click", (e) => {
+          e.stopPropagation();
+          abrirModalImagem(item.caminho, item.tamanho);
+        });
+        acoes.appendChild(btnVer);
+      }
+
+      const btnBaixar = document.createElement("button");
+      btnBaixar.type = "button";
+      btnBaixar.className = "btn-menu";
+      btnBaixar.textContent = "Baixar";
+      btnBaixar.addEventListener("click", (e) => {
+        e.stopPropagation();
+        baixarArquivo(item.caminho);
+      });
+      acoes.appendChild(btnBaixar);
+
+      const protegido = !pastaAtual && ARQUIVOS_PROTEGIDOS.includes(item.nome);
+      if (!protegido) {
+        const btnRenomear = document.createElement("button");
+        btnRenomear.type = "button";
+        btnRenomear.className = "btn-menu";
+        btnRenomear.textContent = "Renomear";
+        btnRenomear.addEventListener("click", (e) => {
+          e.stopPropagation();
+          renomearItem(item.caminho);
+        });
+        acoes.appendChild(btnRenomear);
+
+        const btnDeletar = document.createElement("button");
+        btnDeletar.type = "button";
+        btnDeletar.className = "btn-menu deletar";
+        btnDeletar.textContent = "Deletar";
+        btnDeletar.addEventListener("click", (e) => {
+          e.stopPropagation();
+          deletarItem(item.caminho, item.tipo);
+        });
+        acoes.appendChild(btnDeletar);
+      }
+    }
+
+    li.append(info, acoes);
+    listaArquivos.appendChild(li);
+  }
+}
+
+function esTipoTexto(nome) {
+  const ext = nome.toLowerCase().split(".").pop();
+  return ["tex", "bib", "json", "txt", "md", "cls", "bst", "sty"].includes(ext);
+}
+
+async function criarPasta() {
+  const nome = await mostrarPrompt("Nova pasta", "Nome da nova pasta:");
+  if (!nome) return;
+  try {
+    await api(urlArquivos(), {
+      method: "POST",
+      body: JSON.stringify({ nome }),
+    });
+    await carregarArquivos();
+  } catch (e) {
+    alert(e.message);
+  }
+}
+
+async function enviarArquivosArrastados(files) {
+  for (const f of files) {
+    const formData = new FormData();
+    formData.append("arquivo", f);
+    const resposta = await fetch(urlArquivos(pastaAtual || ""), {
+      method: "PUT",
+      body: formData,
+    });
+    if (!resposta.ok) {
+      const dados = await resposta.json().catch(() => ({}));
+      throw new Error(dados.detail || "Erro ao enviar arquivo.");
+    }
+  }
+  await carregarArquivos();
+}
+
+async function uploadArquivos() {
+  const files = inputUploadArquivo.files;
+  if (!files || files.length === 0) return;
+  try {
+    await enviarArquivosArrastados(files);
+    inputUploadArquivo.value = "";
+  } catch (e) {
+    alert(e.message);
+  }
+}
+
+async function baixarArquivo(caminho) {
+  window.location.href = urlArquivos(caminho);
+}
+
+async function deletarItem(caminho, tipo) {
+  const confirmado = await mostrarConfirmar(
+    tipo === "pasta" ? "Deletar pasta" : "Deletar arquivo",
+    tipo === "pasta"
+      ? `Tem certeza que deseja deletar a pasta "${caminho}"? Ela precisa estar vazia.`
+      : `Tem certeza que deseja deletar o arquivo "${caminho}"?`
+  );
+  if (!confirmado) return;
+  try {
+    await api(urlArquivos(caminho), { method: "DELETE" });
+    await carregarArquivos();
+  } catch (e) {
+    alert(e.message);
+  }
+}
+
+async function renomearItem(caminhoAntigo) {
+  const nomeAtual = caminhoAntigo.split("/").pop();
+  const novoNome = await mostrarPrompt("Renomear", "Novo nome:", nomeAtual);
+  if (!novoNome || novoNome === nomeAtual) return;
+  const partes = caminhoAntigo.split("/");
+  partes.pop();
+  partes.push(novoNome);
+  try {
+    await api(urlArquivos("move"), {
+      method: "POST",
+      body: JSON.stringify({ origem: caminhoAntigo, destino: partes.join("/") }),
+    });
+    await carregarArquivos();
+  } catch (e) {
+    alert(e.message);
+  }
+}
+
+async function abrirModalImagem(caminho, tamanho) {
+  try {
+    const url = urlArquivos(caminho);
+    const resposta = await fetch(url, { cache: "no-store" });
+    if (!resposta.ok) throw new Error("Não foi possível carregar a imagem.");
+    const blob = await resposta.blob();
+    if (urlImagemAtual) URL.revokeObjectURL(urlImagemAtual);
+    urlImagemAtual = URL.createObjectURL(blob);
+    imagemModal.src = urlImagemAtual;
+    tituloImagemModal.textContent = caminho.split("/").pop();
+    btnBaixarImagem.href = url;
+    const kb = (tamanho / 1024).toFixed(1);
+    infoImagemModal.textContent = `${kb} KB · ${caminho}`;
+    modalImagem.classList.remove("oculto");
+  } catch (e) {
+    alert(e.message);
+  }
+}
+
+function fecharModalImagem() {
+  modalImagem.classList.add("oculto");
+  imagemModal.removeAttribute("src");
+  if (urlImagemAtual) {
+    URL.revokeObjectURL(urlImagemAtual);
+    urlImagemAtual = null;
+  }
+}
+
+async function editarArquivoTexto(caminho) {
+  try {
+    if (sujo) {
+      const confirmado = await mostrarConfirmar(
+        "Alterações não salvas",
+        "Há alterações não salvas no editor. Abrir este arquivo mesmo assim?"
+      );
+      if (!confirmado) return;
+    }
+    const resposta = await fetch(urlArquivos(caminho));
+    if (!resposta.ok) throw new Error("Não foi possível ler o arquivo.");
+    const conteudo = await resposta.text();
+    editor.setValue(conteudo);
+    sujo = false;
+    btnSalvar.disabled = true;
+    btnCompilar.disabled = false;
+    limparPrevia();
+    fecharLog();
+    marcarAtivo();
+    indicador(`Editando: ${caminho}`);
+    setTimeout(() => indicador(""), 1500);
+  } catch (e) {
+    alert(e.message);
+  }
+}
+
 async function abrirArtigo(evento, ano, slug) {
-  if (sujo && !confirm("Há alterações não salvas. Abrir outro artigo mesmo assim?")) return;
+  if (sujo) {
+    const confirmado = await mostrarConfirmar(
+      "Alterações não salvas",
+      "Há alterações não salvas no editor. Abrir outro artigo mesmo assim?"
+    );
+    if (!confirmado) return;
+  }
   try {
     indicador("carregando…", true);
     const dados = await api(`/api/artigos/${evento}/${ano}/${slug}`);
@@ -664,9 +1068,13 @@ async function abrirArtigo(evento, ano, slug) {
     atualEl.textContent = dados.titulo || dados.slug;
     btnSalvar.disabled = true;
     btnCompilar.disabled = false;
+    if (btnDeletarArtigoEl) btnDeletarArtigoEl.disabled = false;
     limparPrevia();
     fecharLog();
     marcarAtivo();
+    resetarNavegacaoArquivos();
+    if (painelArquivos) painelArquivos.classList.remove("oculto");
+    carregarArquivos();
     indicador("");
   } catch (e) {
     indicador("");
@@ -695,26 +1103,29 @@ async function salvar() {
 
 async function deletarArtigo() {
   if (!slugAtual) return;
-  const confirmacao = confirm(
-    `Tem certeza que deseja deletar o artigo "${atualEl.textContent}"? Esta ação não pode ser desfeita.`
+  const confirmado = await mostrarConfirmar(
+    "Deletar artigo",
+    `Tem certeza que deseja deletar o artigo "${atualEl.textContent}"? Todos os arquivos também serão removidos. Esta ação não pode ser desfeita.`
   );
-  if (!confirmacao) return;
+  if (!confirmado) return;
   try {
     indicador("deletando…", true);
     await api(`/api/artigos/${eventoAtual}/${anoAtual}/${slugAtual}`, { method: "DELETE" });
     eventoAtual = null;
     anoAtual = null;
     slugAtual = null;
-    atualEl.textContent = "Nenhum artigo aberto";
-    editor.setValue("");
+    if (atualEl) atualEl.textContent = "Nenhum artigo aberto";
+    if (editor) editor.setValue("");
     sujo = false;
-    btnSalvar.disabled = true;
-    btnCompilar.disabled = true;
+    if (btnSalvar) btnSalvar.disabled = true;
+    if (btnCompilar) btnCompilar.disabled = true;
+    if (btnDeletarArtigoEl) btnDeletarArtigoEl.disabled = true;
+    if (painelArquivos) painelArquivos.classList.add("oculto");
     limparPrevia();
     fecharLog();
     carregarLista();
     indicador("");
-    setTimeout(() => indicador("Artigo deletado"), 1000);
+    setTimeout(() => indicador("Artigo deletado"), 1500);
   } catch (e) {
     indicador("");
     alert(e.message);
@@ -859,5 +1270,102 @@ window.addEventListener("beforeunload", (e) => {
   if (sujo) {
     e.preventDefault();
     e.returnValue = "";
+  }
+});
+
+// Event listeners do painel de arquivos
+btnNovaPasta.addEventListener("click", criarPasta);
+btnUploadArquivo.addEventListener("click", () => inputUploadArquivo.click());
+inputUploadArquivo.addEventListener("change", uploadArquivos);
+btnVoltarPasta.addEventListener("click", async () => {
+  if (historicoPastas.length === 0) return;
+  pastaAtual = historicoPastas.pop();
+  await carregarArquivos();
+});
+
+btnFecharImagem.addEventListener("click", fecharModalImagem);
+modalImagem.addEventListener("click", (e) => {
+  if (e.target === modalImagem) fecharModalImagem();
+});
+
+buscaArquivosEl.addEventListener("input", filtrarArquivos);
+
+if (painelArquivos) {
+  painelArquivos.addEventListener("dragover", (e) => {
+    if (!e.dataTransfer || !Array.from(e.dataTransfer.types || []).includes("Files")) return;
+    e.preventDefault();
+    dropZoneEl.classList.add("ativo");
+  });
+  painelArquivos.addEventListener("dragleave", (e) => {
+    if (painelArquivos.contains(e.relatedTarget)) return;
+    dropZoneEl.classList.remove("ativo");
+  });
+  painelArquivos.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropZoneEl.classList.remove("ativo");
+    const files = e.dataTransfer && e.dataTransfer.files;
+    if (!files || files.length === 0) return;
+    enviarArquivosArrastados(files).catch((erro) => alert(erro.message));
+  });
+}
+btnConfirmar.addEventListener("click", () => {
+  if (confirmResolve) {
+    confirmResolve(true);
+    fecharModalConfirmar();
+  }
+});
+
+btnCancelarConfirmar.addEventListener("click", () => {
+  if (confirmResolve) {
+    confirmResolve(false);
+    fecharModalConfirmar();
+  }
+});
+
+modalConfirmar.addEventListener("click", (e) => {
+  if (e.target === modalConfirmar && confirmResolve) {
+    confirmResolve(false);
+    fecharModalConfirmar();
+  }
+});
+
+btnConfirmarPrompt.addEventListener("click", () => {
+  if (promptResolve) {
+    promptResolve(promptValor.value.trim() || null);
+    fecharModalPrompt();
+  }
+});
+
+btnCancelarPrompt.addEventListener("click", () => {
+  if (promptResolve) {
+    promptResolve(null);
+    fecharModalPrompt();
+  }
+});
+
+modalPrompt.addEventListener("click", (e) => {
+  if (e.target === modalPrompt && promptResolve) {
+    promptResolve(null);
+    fecharModalPrompt();
+  }
+});
+
+promptValor.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && promptResolve) {
+    promptResolve(promptValor.value.trim() || null);
+    fecharModalPrompt();
+  }
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  if (!modalImagem.classList.contains("oculto")) {
+    fecharModalImagem();
+  } else if (!modalConfirmar.classList.contains("oculto")) {
+    if (confirmResolve) confirmResolve(false);
+    fecharModalConfirmar();
+  } else if (!modalPrompt.classList.contains("oculto")) {
+    if (promptResolve) promptResolve(null);
+    fecharModalPrompt();
   }
 });
