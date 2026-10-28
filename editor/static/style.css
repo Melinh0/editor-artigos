@@ -305,6 +305,7 @@ html[data-tema="escuro"] .item-lista.ativo {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  position: relative;
 }
 
 .item-arquivo .icone svg {
@@ -328,15 +329,21 @@ html[data-tema="escuro"] .item-lista.ativo {
 }
 
 .item-arquivo .cadeado-protegido {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
   display: flex;
   align-items: center;
-  flex-shrink: 0;
   color: var(--texto-fraco);
+  background: var(--fundo-3);
+  border: 1px solid var(--borda);
+  border-radius: 4px;
+  padding: 2px;
 }
 
 .item-arquivo .cadeado-protegido svg {
-  width: 14px;
-  height: 14px;
+  width: 10px;
+  height: 10px;
 }
 
 .item-arquivo .meta-arquivo {

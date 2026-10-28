@@ -890,7 +890,7 @@ function renderizarArquivos(itens) {
         cadeado.className = "cadeado-protegido";
         cadeado.innerHTML = SVG_CADEADO;
         cadeado.title = "Arquivo protegido: não pode ser renomeado ou deletado";
-        info.insertBefore(cadeado, meta);
+        icone.appendChild(cadeado);
       }
 
       const btnRenomear = document.createElement("button");
@@ -1387,3 +1387,13 @@ document.addEventListener("keydown", (e) => {
     fecharModalPrompt();
   }
 });
+
+const btnToggleArquivos = document.getElementById("btn-toggle-arquivos");
+if (btnToggleArquivos) {
+  btnToggleArquivos.addEventListener("click", () => {
+    const oculto = painelArquivos.classList.toggle("oculto");
+    btnToggleArquivos.textContent = oculto ? "☰" : "✕";
+    btnToggleArquivos.title = oculto ? "Mostrar painel de arquivos" : "Ocultar painel de arquivos";
+    editor.refresh();
+  });
+}
