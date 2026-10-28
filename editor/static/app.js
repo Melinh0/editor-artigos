@@ -1372,7 +1372,7 @@ const btnToggleLateral = document.getElementById("btn-toggle-lateral");
 if (btnToggleLateral) {
   btnToggleLateral.addEventListener("click", () => {
     const oculto = lateralEl.classList.toggle("oculto");
-    btnToggleLateral.textContent = oculto ? "☰" : "✕";
+    btnToggleLateral.textContent = "☰";
     btnToggleLateral.title = oculto ? "Mostrar painel lateral" : "Ocultar painel lateral";
     editor.refresh();
   });
