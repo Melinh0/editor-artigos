@@ -1,0 +1,223 @@
+\documentclass[journal]{IEEEtran}
+
+\usepackage[super]{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{subfigure}
+
+\begin{document}
+\title{Cloud-Integrated IoT Mesh Networking for Smart Farm Monitoring}
+
+\author{
+\IEEEauthorblockN{Yago M. da Costa}
+\IEEEauthorblockA{State University of Cear\'a, Fortaleza, Brazil \\
+yago.costa@aluno.uece.br}\\
+\and
+\IEEEauthorblockN{Samuel W. Almeida}
+\IEEEauthorblockA{State University of Cear\'a, Fortaleza, Brazil \\
+samuel.william@aluno.uece.br}\\
+\and
+\IEEEauthorblockN{Francisco José C. Conceição}
+\IEEEauthorblockA{State University of Cear\'a, Fortaleza, Brazil \\
+fco.cardoso@aluno.uece.br}\\
+\and
+\IEEEauthorblockN{Eduardo E. Mosca}
+\IEEEauthorblockA{University of Campinas, Campinas, Brazil \\
+eduardo.mosca@ic.unicamp.br}\\
+\and
+\IEEEauthorblockN{Rafael L. Gomes}
+\IEEEauthorblockA{State University of Cear\'a, Fortaleza, Brazil \\
+rafa.lopes@uece.br}
+}
+
+\maketitle
+
+\begin{abstract}
+Smart Farms are an application of the Internet of Things (IoT) in the agricultural sector, where a variety of agricultural equipment and environmental devices are integrated with advanced technologies. Network connectivity among these devices enables real-time data exchange, facilitating the monitoring and efficient management of agricultural operations, optimizing resources and improving farm productivity and sustainability. Thus, this work presents a precision agriculture model that enables real-time collection of farm data and mapping, allowing identification of any problems on the farm and their locations in real time. To achieve this, the system uses a mesh network for full farm connectivity. It integrates with a cloud service that stores and processes data from a soil moisture sensor, validating real-time collection and transmission.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Industry 4.0, IoT Mesh Networks, Smart Farming, Communication, Wireless.
+\end{IEEEkeywords}
+
+\section{Introduction}
+
+Since the Industrial Revolution, the agricultural sector has been developing very rapidly to adequately meet global demand and also to increase food quality. As a result, plantations and farms have been increasingly investing in resource monitoring and crop cultivation in order to achieve these goals. Such a concept has been solidifying in the literature as Smart Farms and Precision Agriculture \cite{karunathilake2023path}.
+
+Both terms refer to the technologies used in plantations. However, for Smart Farms, the term is related to the capture, collection, and interpretation of data collected from plants, while Precision Agriculture is more focused on increasing efficiency and profitability through the optimization of inputs and resources, reducing environmental impact \cite{prakash2023advancements}. Current and future agricultural technologies, fundamental to Precision Agriculture, are divided into three main categories \cite{8804834}: Internet of Things (IoT), Unmanned Aerial Vehicles (UAVs), and Sensors, essential for Precision Agriculture. However, the development of Precision Agriculture is limited by the lack of system models that guide the construction of IoT-based monitoring systems that are scalable and possess efficient data analysis capabilities \cite{karunathilake2023path}.
+
+In general, IoT-based solutions for smart environments suffer from connectivity problems due to the limited transmission power of devices, as well as interference from other devices and the network environment, resulting in low transmission capacity in long-range scenarios \cite{Brito.LNet.2026}. This scenario happens with LoRaWAN technology \cite{czeczot2023analysis}, where data transmission can occur over great distances, but the transmission rate is limited to a few Kbps (between 300 bps and 50 kbps) and the deployment cost is high. On the other hand, WiFi technology (802.11 family) has the following advantages \cite{IJES.2022.129802}: (A) High bandwidth, allowing fast data transfer between devices (supporting large volumes of data, such as high-resolution videos and images); and (B) Considerable range, enabling IoT devices to communicate reliably with advanced security protocols.
+
+An alternative for expanding coverage is the use of IoT Mesh Networks over WiFi \cite{morman2023iot}. These networks allow direct communication between IoT devices, Internet access, and integration with cloud services for data storage and analysis \cite{10.1145/1858477.1858479, gomes2011using}. With dynamic routing algorithms and centralized management, IoT Mesh Networks guarantee scalability to add new devices without compromising performance, thus becoming a key approach for IoT applications such as smart farms and precision agriculture \cite{10.1007/978-3-642-13789-1_1,gaikwad2023wireless}.
+
+Along with this need for connectivity, smart farms and precision agriculture require processing the collected data to enable applications that provide valuable indicators about the state of plantations, predict diseases, optimize the use of resources such as water and fertilizers, and even automate processes such as irrigation and spraying \cite{karunathilake2023path}. These applications not only increase agricultural efficiency and productivity but also contribute to sustainable management of natural resources, reducing costs and environmental impacts. In this scenario, cloud computing is a crucial approach because it provides a flexible and scalable infrastructure for storage, processing, and analysis of large volumes of agricultural data, where continuous real-time data collection requires agile and efficient processing and storage capacity \cite{turukmane2023smart}.
+
+However, solutions integrating these approaches are complex, as they must address the necessary communication capacity and transmission rates \cite{10154280,portela-noms}. This integration involves ensuring that diverse devices and communication protocols work in harmony, which presents a complex technical challenge. Another crucial issue involves data management and latency \cite{costa2021features}. With large volumes of data being continuously generated by IoT devices, real-time processing becomes highly challenging, particularly in Mesh Networks, where communication can be slow and prone to failures. System scalability and resilience are also primary concerns, since the infrastructure must be capable of supporting a vast number of devices and maintaining efficient operation, even in the event of failures \cite{Brito.LNet.2026}.
+
+Within this context, this study presents a solution for smart farming and precision agriculture, where IoT devices serve not only to collect environmental data but also to actively participate in the communication process. This is achieved through a WI-FI-based mesh network with dynamic routing, where data is transmitted to a real cloud environment for processing. The proposed solution was evaluated in a real-world environment within the university using a soil moisture monitoring application running on the AWS cloud, analyzing aspects such as connectivity capacity, transmission rates across multiple hops, and end-to-end delay (between the device and the cloud).
+
+\section{Related Work}
+
+Sayem et al. \cite{SAYEM2023100358} focus on ensuring the security of agricultural farms in Bangladesh, where theft and aggressive activities are on the rise. The authors present an IoT-based smart agricultural security system designed to detect unauthorized access and alert farmers in real time. The system consists of a transmitting station located on the farm and two receiving stations, one at the farmer's residence and another on their mobile device.
+
+Prasa et al. \cite{doi:10.1080/01430750.2021.1953591} aim to optimize monitoring and management in smart agriculture through LoRaWAN-based Wireless Sensor Networks. The study encompasses remote monitoring and sensor data analysis using an unsupervised clustering algorithm, with the goal of automating the agricultural system. However, the model is limited to data collection and transmission at a single specific location. Similarly, Pechlivani et al. \cite{mi14091698} present an IoT-based tool designed for soil analysis and environmental monitoring within the agricultural domain. The tool integrates various sensors for both soil and environmental measurements to enable real-time monitoring.
+
+Vineetha et al. \cite{engproc2023059118} describe a structural algorithm for managing agroecosystems autonomously using real-time data collected from IoT devices. The algorithm is part of a system that enables the monitoring, scheduling, and control of various agroecosystem components, such as water, soil, fertilizers, light, humidity, temperature, soil pH, and crop growth. Furthermore, the algorithm can identify general trends and patterns in the environment and offer timely advice to farmers based on real-time conditions.
+
+References \cite{SAYEM2023100358,doi:10.1080/01430750.2021.1953591,mi14091698,engproc2023059118} present proposals that apply IoT for monitoring and actuation in agricultural environments. However, unlike the proposal presented in this paper, these studies overlook the transmission coverage of the agricultural environment and the transmission rates required to meet the necessary QoS requirements. This issue is addressed in this study by integrating data collection into an IoT mesh network structure, which, in addition to expanding coverage, successfully maintains the required transmission rates. Furthermore, integration with a cloud environment enables scalable and accurate data processing and analysis for Agriculture 4.0 services. Therefore, it is evident that no recent proposal found in the literature has developed a precision agriculture solution employing Wi-Fi-based IoT mesh networks integrated with cloud computing, which is the core objective of this work.
+
+\section{Proposed Solution}
+\label{sec:proposal}
+
+IoT networks in agriculture are becoming increasingly complex, incorporating a variety of devices such as soil moisture sensors, irrigation controllers, and other monitoring instruments. Each device has a specific functionality and, therefore, a unique network behavior. For example, soil moisture sensors in our network periodically send data to a central server, while other devices may operate differently. This diversity of devices and behaviors increases the complexity of network management and resource optimization solutions, such as energy saving and data processing.
+
+This work proposes a solution for smart farming and precision agriculture using IoT Mesh Networks with the ESP32 microcontroller \cite{datasheet2021esp32s}, where Figure \ref{fig:arq} illustrates the defined schematization. The solution is designed to allow communication between devices through the Mesh Network, with one of the ESP32 acting as the central node (root). This central node is responsible for the interconnection between the internal Mesh Network and the external connection, facilitating data transmission to an AWS server. The non-root nodes periodically send information, including soil moisture, device MAC, and a timestamp, to the root node. The root node, in turn, forwards this information to an AWS server. An AWS routine receives this data and stores it in a DynamoDB database. Each node has its own table in DynamoDB, allowing precise mapping of the farm.
+
+\begin{figure}[!htb]
+	\centering
+	    \includegraphics[width=0.48\textwidth]{figures/diagram.png}
+	\caption{Solution Overview.}
+ \label{fig:arq}
+\end{figure}
+
+Thus, the data flow follows a clear architecture: (I) Monitoring and Data Collection by the sensors at the network nodes; (II) Data transmission to the root node; (III) Communication from the root node to the AWS server; and (IV) Storage and Organization of Data in DynamoDB. This flow ensures that the collected data is procedurally organized and easily accessible for analysis and decision making in farm management.
+
+In a mesh network topology formed by ESP devices, data routing between nodes is achieved through distributed and self-organizing mechanisms. Each node within the network has the capacity to forward data to other nodes, thus establishing a communication mesh in which nodes function as routers for the propagation of data traffic. When an ESP32 device needs to transmit data to another entity within the network, it performs an analysis of the internal routing table to determine the next hop to be made. This table contains data about the interconnected nodes and the intrinsic quality of their connections. Using this data, the device chooses an optimized path to effectively forward the data \cite{datasheet2021esp32s}.
+
+Once the data source device establishes the next step in the sequence, it proceeds to send the data to the selected node. This node, in turn, upon consulting its own routing table, forwards the data to the next node located along the path towards the final destination. This process continues to operate until the data effectively reaches the desired endpoint. The importance of the mesh network concept is emphasized in this context, where each node collaboratively participates in the data routing function, resulting in greater network robustness and expandability. In the event that a node encounters a failure or is removed from the network, the remaining nodes can automatically discern alternative routes, thus ensuring uninterrupted communication.
+
+This methodology allows not only the efficient collection of relevant data for precision agriculture but also offers a scalable and adaptable structure for different types of sensors and IoT devices. The integration with cloud services, such as AWS and DynamoDB, provides robustness and flexibility for processing and storing large volumes of data.
+
+\subsection{Monitoring and Data Collection}
+Data collection was carried out using a soil moisture sensor, used as a proof of concept to verify whether it is feasible for the microcontroller to collect data directly from a sensor while performing network connection operations. The soil moisture sensor, illustrated in Figure \ref{fig:sensor}, was chosen to ensure data accuracy. During the research, several similar sensors were found, but with significant variations in readings, due to differences in components such as capacitors and resistors, essential for data stability. Moreover, the compatibility of the measuring chip is crucial, as some models require more power, which is problematic for microcontrollers like the ESP32, which do not operate with 5 \textit{volts}.
+
+\begin{figure}[!htb]
+\centering
+\subfigure[Moisture Sensor.]{\includegraphics[angle=0,width=0.28\textwidth]{figures/sensor-bom-todo.jpg}
+\label{fig:sensor-1}
+}
+\hfil
+\subfigure[Sensor Capacitors.]{\includegraphics[trim={45cm 2cm 1.5cm 1.5cm},clip,width=0.15\textwidth]{figures/dois-sensores.jpg}
+\label{fig:sensor-2}
+}
+\caption{Evaluated Sensors.}
+\label{fig:sensor}
+\end{figure}
+
+In Figure \ref{fig:sensor}, the position marked as U2 indicates a component that requires a capacitor to stabilize the voltage and avoid oscillations. As for the integrated oscillator in U1, the use of the integrated circuit (IC) 555C is recommended, capable of withstanding voltages from 2 to 15 \textit{volts}. In contrast, the 555M used is only compatible with voltages from 5 to 15 \textit{volts}, limiting its applicability in many microcontrollers that operate around 3.3 \textit{volts}, such as the ESP32. Finally, it is necessary to perform a continuity test between GND and R4, because if this trace does not exist, the change in measured values occurs gradually when there are actual changes in the environment, whereas an immediate change is required during measurement, as this can interfere with data collection. In this case, both sensors have it, but it is something that must be verified.
+
+Finally, once this type of sensor has its components validated and verified, the data returned by it are an analog signal that varies from 260 to 510 and are classified in the analysis as shown in Table \ref{tab:Relationship}, with 260 being the value where the soil is wetter and 510 the driest value.
+
+\begin{table}[h!]
+	\centering
+    \caption{Relationship of sensor moisture data}
+		\begin{tabular}{p{2.5cm}|p{2.3cm}|p{2.0cm}}\hline
+\textbf{Condition}&\textbf{Minimum value}&\textbf{Maximum value}\\\hline\hline
+Very Wet&260&343\\\hline
+Wet&343&427\\ \hline
+Dry&427 &510\\\hline
+	\end{tabular}
+ \label{tab:Relationship}
+\end{table}
+
+\subsection{Data Transmission Through the IoT Mesh Network}
+Once the data is collected from the sensor by the \textit{ESP32} microcontroller, it must be transmitted. Data transmission is performed using \textit{Wi-Fi} as the physical layer communication protocol, in conjunction with a mesh topology, while \textit{MQTT} is employed as the application layer protocol. The mesh topology is implemented using the official \textit{ESP32} \textit{Framework}\footnote{https://github.com/espressif/esp-mesh-lite}, the \textit{ESP-IDF}, which operates as follows: the construction of a \textit{Wi-Fi Mesh} network in the ESP-IDF begins with the uniform configuration of each node, including the \textit{Mesh} network ID, router settings, and \textit{softAP} configurations. The process proceeds with the selection of a root node, which can be designated manually or elected automatically based on signal strength. Following the connection of the root node to the router, nearby idle nodes form the second layer of the network, becoming intermediate parent nodes. Subsequent layers are formed by idle nodes connecting to these parent nodes. To prevent exceeding the maximum number of layers, nodes at the boundary layer become leaf nodes. The process also includes mechanisms for the automatic selection or user designation of the root node, and it accounts for the influence of asynchronous node reboots on the final network structure.
+
+The root node in the \textit{Mesh} network is essential for connecting the internal network to the external one. Messages from the network nodes are first sent to the root node, which then routes them to their external destination. Similarly, the external network communicates with a specific node by sending messages through the root node. This root node identifies each point in the network by its MAC address; thus, storing these addresses is crucial to enable bidirectional communication and effective network mapping.
+
+\subsection{Cloud Communication}
+To establish communication with \textit{AWS}, it was first necessary to select the appropriate service. In this case, AWS IoT Core was chosen, which is a service provided by the company for the communication and management of IoT devices. Within this service, the primary protocols available for communicating with the server are \textit{MQTT} and \textit{HTTP}. Notably, the former is offered in two modes: its conventional version and a version built over the \textit{WebSocket} protocol. The \textit{MQTT} protocol was selected since it was specifically designed for IoT devices, providing greater benefits when compared to \textit{HTTP}.
+
+Once the protocol was chosen, it is necessary to configure access to the microcontroller so that communication with the network is possible, since it is a connection via \textit{MQTTS}. To do so, it is necessary to go to the AWS IoT Core and manually register the device, so that the certificates and credentials are generated that must be embedded in each device so that at the time of connection, the server accepts the device and data exchange is possible. Since the \textit{ESP32} \textit{Mesh} network has only one node that communicates with the external network, it was necessary to perform this process only once.
+
+\section{Experiments}
+\label{sec:experimentos}
+
+The main focus is on evaluating data collection via WiFi Mesh network with the integration of these devices with an AWS server for data storage and the transmission capacity of the IoT mesh network. Thus, Figure \ref{fig:esquema} presents the scenario of the data collection experiments, while Figure \ref{fig:cenario} illustrates the scenario used for the transmission analysis.
+
+\begin{figure}[!htb]
+\centering
+\subfigure[Data Collection Experiment Scenario.]{\includegraphics[trim={15cm 5cm 30cm 10cm},clip,width=0.45\textwidth]{figures/sistema.jpg}
+\label{fig:esquema}
+}
+\subfigure[Transmission Experiment Scenario.]{\includegraphics[width=0.45\textwidth]{figures/iot.png}
+\label{fig:cenario}
+}
+\caption{Defined Evaluation Scenarios.}
+\label{fig:cenarios}
+\end{figure}
+
+Attention was given to the functionality of the central node in the communication between the internal Mesh network and the external connection, as well as to the efficiency in the data collection and transmission process, including soil moisture values, MAC identification, and timestamps, for storage in the AWS DynamoDB database. Each node, representing a distinct part of the farm, contributes to a detailed tracking of the agricultural environment, demonstrating the viability and practical implications of the proposed system.
+
+During the experiments, the following network configurations were evaluated: variation in the number of nodes, being 1 to 3 nodes with sensors and one just to relay the data, different data collection intervals (30 seconds to 5 minutes, interchanging every 30 seconds) and different distances with walls and without walls (5 to 30 meters). Table \ref{tab:conf} presented below exemplifies the experiment configuration.
+
+\begin{table}[h!]
+	\centering
+    \caption{Experiment Configuration}
+		\begin{tabular}{p{3cm}|p{4.5cm}}\hline
+\textbf{Data Configuration}&\textbf{Details}\\\hline\hline
+Number of nodes& 1 to 3 nodes (sensors) + 1 node (Access Point - AP)\\\hline
+Collection intervals& 30 seconds to 5 minutes (jumping between 30-second intervals)\\ \hline
+Distance&15 meters\\ \hline
+	\end{tabular}
+\label{tab:conf}
+\end{table}
+
+To perform the measurement and validation of the data, the variations in response time between the message being sent and its arrival at the server were measured, in addition to validating the quality of the data measured by the soil moisture sensor and whether the data was arriving correctly at the server.
+
+This specific configuration was selected for the tests due to its controllable environment, which is essential for the effective conduction of the experiments. This choice facilitated precise monitoring and verification of the system's operation as planned. The focus is on ensuring that the data collection adequately reflected soil conditions and that the transmission of this data occurred without failures.
+
+\subsection{Experiment Results}
+\label{sec:results}
+
+\subsubsection{Transmission Capacity in IoT Mesh Networks}
+
+The transmission experiments carried out aim to identify the performance of the IoT Mesh Network in practical smart farm environments, where two analyses were performed: (I) Transfer rate with iPerf, presented in Figure \ref{fig:iperf}; and (II) Delay with the Ping tool, illustrated in Figure \ref{fig:ping}. For each case, we performed $3$ tests: Test $1$ with one hop (Transmission Node and IoT Gateway); Test $2$ with two hops (Transmission Node, Intermediate Node, and IoT Gateway); and Test $3$ with three hops (Transmission Node, Two Intermediate Nodes, and IoT Gateway), as shown in Figure \ref{fig:cenario}. Additionally, we executed each test $20$ times in order to obtain the average of the measurements obtained.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[trim={0 0 0 4.5cm},clip,width=0.48\textwidth]{figures/transmission-en.png}
+\caption{Transfer Rate Results}
+\label{fig:iperf}
+\end{figure}
+
+The iPerf experiment result indicates that the transfer rate decreases as data passes through more hops in the IoT Mesh Network. This performance loss must be taken into account when planning the network configuration and sizing. In more detail, we can discuss the following statements about the tests: The single-hop case obtained an average transfer rate of 4.4 Mbits/s, where there is a 53\% drop in transfer rate when an additional hop is applied. Finally, the two-hop case achieved an average value of 0.66 Mbits/s of transfer rate, representing a drop of 60\% and 82\% in transfer rate compared to the previous one-hop and two-hop tests, respectively.
+
+The Ping tool is a network utility used to test the accessibility and responsiveness of a host or network device on an IP-based network. The Ping tool sends a specified number of ICMP packets to the target device and records the time required for each packet to travel to the destination and return. This information helps network administrators diagnose network connectivity problems, measure network performance, and analyze response time issues. Additionally, ping can reveal packet loss and latency variations, which are critical factors in assessing the quality of a network connection. In the experiments carried out, the ping target address was set to the university website address, which is hosted on the AWS Cloud, and we varied the packet size ($100$ bytes, $500$ bytes, and $1000$ bytes) to perform a more detailed analysis. These results are presented in Figure \ref{fig:ping}.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[trim={0 0 0 3.5cm},clip,width=0.48\textwidth]{figures/atraso-en.png}
+\caption{Delay Results}
+\label{fig:ping}
+\end{figure}
+
+In the case of $100$ Bytes, the One Hop, Two Hops, and Three Hops cases obtained an average delay of 61 ms, 113 ms, and 200 ms, respectively. Thus, from single hop to two hops, there was an 85\% increase in delay compared to the previous test. Similarly, the three-hop case had a 227\% increase compared to the first test. On the other hand, for $1000$ Bytes, a delay of 82 ms, 133 ms, and 218 ms occurred for the One Hop, Two Hops, and Three Hops scenarios, respectively. These results corroborate with the previous experiments where the increase in delay with the increase in hops followed a similar proportion.
+
+The results presented underline the inherent complexity of data transmission in an IoT Mesh Network topology, where latency variability is a critical factor. This variability is partly a consequence of the sizing of data packets, which can directly affect the average latency observed across the network. Latency fluctuates as packets are transmitted through multiple nodes, being influenced by factors such as the heterogeneity of network nodes, which may have different processing and communication capacities, and possible anomalies during transmissions, such as interference or temporary congestion in certain nodes. This behavior is typical in networks with multiple transmission and reception points, where the characteristics of each node can introduce inconsistencies in global performance.
+
+Despite these latency fluctuations, the tests demonstrated excellent reliability in packet delivery, with an insignificant packet loss rate throughout the evaluations carried out. Even in scenarios where packets were forwarded through several nodes before reaching the destination node, the data transfer rate remained high enough to support demanding applications, such as 720p video streaming on YouTube and live broadcasts. This result is particularly relevant because it indicates that, despite variable latency, the IoT Mesh Network can sustain a continuous and high-quality data flow, which is essential for applications that rely on real time and high bandwidth capacity.
+
+Another crucial aspect highlighted is the ability to orchestrate connectivity within the network, which showed no signs of restriction, even with the addition of a large number of devices and sensors. This suggests that the network infrastructure is robust and scalable, allowing the implementation of complex tasks and monitoring without compromising performance. This characteristic provides a significant advantage compared to other communication protocols that may not offer the same level of support for large-scale connectivity, especially in environments where the density of IoT devices is high. In summary, the results indicate that, despite the challenges inherent to variable latency, the studied IoT Mesh Network topology is highly effective in supporting a wide range of applications, both in terms of reliability and ability to manage a dense and heterogeneous network.
+
+\section{Conclusion}
+\label{sec:conclusao}
+
+With the evolution of the Internet of Things, it is possible to deploy Smart Farms that can take various advantages to have an improvement not only in the soil quality of plantations but also to have better food quality and productivity. However, there are still problems within the literature that need to be validated and experimented, where characteristics of transmission rate and connectivity between sensors are considered with a focus on scalability.
+
+In this context, this work presented a solution capable of performing instantaneous, organized, and adaptive monitoring of measurements in smart farms that can be applied to various types of contexts with different sizes, able to serve both smaller and larger farms. Initially, the soil data collection tests focused on moisture, but with the proven efficiency of the system, it is possible to increase the amount of data collected without affecting performance. Data accuracy now depends on the quality and efficiency of the sensors used. Additionally, the transmission capacity tests concluded that the use of IoT mesh networks is viable to support data communication for various precision agriculture applications.
+
+In terms of connectivity, the system performed well overall in the presented scenario, ensuring real-time data delivery, with few data losses, and the integration with \textit{AWS} enabled real-time analysis as proposed.
+
+As future work, we plan to select a specific agricultural crop to refine the study, incorporating a broader range of sensors beyond soil moisture, such as temperature, electrical conductivity (EC), pH, and NPK (Nitrogen, Phosphorus, and Potassium), which are critical for precise crop management. Based on the time-series data accumulated in the cloud database, predictive models can be developed to provide real-time feedback to farmers regarding significant changes in soil attributes that may affect the chosen crop. Furthermore, we intend to integrate multimedia content to enable computer vision solutions and expand the transmission technologies, creating a heterogeneous wireless network that combines WiFi and LoRaWAN with distinct central nodes to enhance data \textit{offloading} from the monitored environment.
+
+\section*{Declaration of Competing Interest}
+The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+
+\section*{Acknowledgments}
+The authors thank the National Council for Scientific and Technological Development (CNPq) under grants $N^{o}$ 303877/2021-9 and $N^{o}$ 405940/2022-0, and the Coordination for the Improvement of Higher Education Personnel (CAPES) under grant $N^{o}$ 88887.954253/2024-00, for the financial support.
+
+\bibliographystyle{IEEEtran}
+\bibliography{Mybib}
+
+\end{document}
