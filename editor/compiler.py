@@ -16,7 +16,7 @@ BUILD_DIR = RAIZ / "build"
 ARQUIVO_ARTIGO = "artigo.tex"
 ARQUIVO_META = "artigo.meta.json"
 TIMEOUT_SEGUNDOS = 90
-LIMITE_LOG = 12000
+LIMITE_LOG = 50000
 
 
 def _atualizar_path_do_registro() -> None:
@@ -135,9 +135,13 @@ def _executar_passe(evento: str, ano: str, slug: str, artigo: Path, saida: Path,
 
 def _executar_bibtex(evento: str, ano: str, slug: str, saida: Path) -> tuple[int, str]:
     pasta_artigo = ARTIGOS_DIR / f"{evento}-{ano}" / slug
+    meta = _ler_meta(evento, ano, slug)
+    modelo = meta.get("modelo", "")
+    pasta_modelo = MODELOS_DIR / modelo
     env = os.environ.copy()
-    env["TEXINPUTS"] = f"{pasta_artigo}{os.pathsep}{MODELOS_DIR}{os.pathsep}{env.get('TEXINPUTS', '')}"
+    env["TEXINPUTS"] = f"{pasta_artigo}{os.pathsep}{pasta_modelo}{os.pathsep}{env.get('TEXINPUTS', '')}"
     env["BIBINPUTS"] = f"{pasta_artigo}{os.pathsep}{env.get('BIBINPUTS', '')}"
+    env["BSTINPUTS"] = f"{pasta_modelo}{os.pathsep}{env.get('BSTINPUTS', '')}"
     cmd = ["bibtex", "-terse", "artigo"]
     proc = subprocess.run(
         cmd,
