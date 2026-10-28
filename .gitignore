@@ -21,5 +21,12 @@ build/
 Thumbs.db
 desktop.ini
 
+# Configuracao local do OpenCode
+.opencode/
+opencode.json
+
+# Instrucoes de agentes (pessoal)
+AGENTS.md
+
 # Artigos pessoais (nao publicar)
 artigos/
