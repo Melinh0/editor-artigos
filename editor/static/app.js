@@ -1368,12 +1368,12 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-const btnToggleArquivos = document.getElementById("btn-toggle-arquivos");
-if (btnToggleArquivos) {
-  btnToggleArquivos.addEventListener("click", () => {
-    const oculto = painelArquivos.classList.toggle("oculto");
-    btnToggleArquivos.textContent = oculto ? "☰" : "✕";
-    btnToggleArquivos.title = oculto ? "Mostrar painel de arquivos" : "Ocultar painel de arquivos";
+const btnToggleLateral = document.getElementById("btn-toggle-lateral");
+if (btnToggleLateral) {
+  btnToggleLateral.addEventListener("click", () => {
+    const oculto = lateralEl.classList.toggle("oculto");
+    btnToggleLateral.textContent = oculto ? "☰" : "✕";
+    btnToggleLateral.title = oculto ? "Mostrar painel lateral" : "Ocultar painel lateral";
     editor.refresh();
   });
 }

@@ -67,6 +67,27 @@ body {
   padding: 16px;
   background: var(--fundo-2);
   overflow-y: auto;
+  transition: width 0.2s, min-width 0.2s, padding 0.2s, opacity 0.2s;
+}
+
+#lateral.oculto {
+  width: 48px;
+  min-width: 48px;
+  padding: 16px 8px;
+  overflow: hidden;
+}
+
+#lateral.oculto h1,
+#lateral.oculto #resumo-status,
+#lateral.oculto #btn-tema,
+#lateral.oculto #btn-novo,
+#lateral.oculto #lista-artigos,
+#lateral.oculto #painel-arquivos {
+  display: none;
+}
+
+#lateral.oculto .lateral-header {
+  justify-content: center;
 }
 
 
@@ -102,10 +123,24 @@ body.redimensionando {
   user-select: none;
 }
 
+.lateral-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
 #lateral h1 {
   margin: 0;
   font-size: 17px;
   color: var(--texto-forte);
+}
+
+#btn-toggle-lateral {
+  padding: 2px 8px;
+  font-size: 12px;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 #resumo-status {

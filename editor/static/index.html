@@ -20,7 +20,10 @@
 <body>
   <aside id="lateral">
     <header>
-      <h1>Editor de Artigos</h1>
+      <div class="lateral-header">
+        <h1>Editor de Artigos</h1>
+        <button id="btn-toggle-lateral" class="botao" type="button" title="Ocultar painel lateral">✕</button>
+      </div>
       <p id="resumo-status">carregando…</p>
       <button id="btn-tema" class="botao" type="button">Tema: escuro</button>
     </header>
@@ -30,7 +33,6 @@
     <section id="painel-arquivos" class="oculto">
       <header class="cabecalho-arquivos">
         <div class="titulo-painel">
-          <button id="btn-toggle-arquivos" class="botao" type="button" title="Ocultar painel de arquivos">✕</button>
           <span>Arquivos do artigo</span>
         </div>
         <div class="busca-arquivos">
