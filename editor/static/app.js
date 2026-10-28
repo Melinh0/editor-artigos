@@ -108,6 +108,7 @@ const SVG_PASTA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" st
 const SVG_TEXTO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>';
 const SVG_IMAGEM = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></svg>';
 const SVG_OUTRO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>';
+const SVG_CADEADO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
 
 function mostrarConfirmar(titulo, mensagem) {
   return new Promise((resolve) => {
@@ -883,27 +884,44 @@ function renderizarArquivos(itens) {
       acoes.appendChild(btnBaixar);
 
       const protegido = !pastaAtual && ARQUIVOS_PROTEGIDOS.includes(item.nome);
-      if (!protegido) {
-        const btnRenomear = document.createElement("button");
-        btnRenomear.type = "button";
-        btnRenomear.className = "btn-menu";
-        btnRenomear.textContent = "Renomear";
+      if (protegido) {
+        li.classList.add("protegido");
+        const cadeado = document.createElement("span");
+        cadeado.className = "cadeado-protegido";
+        cadeado.innerHTML = SVG_CADEADO;
+        cadeado.title = "Arquivo protegido: não pode ser renomeado ou deletado";
+        info.insertBefore(cadeado, meta);
+      }
+
+      const btnRenomear = document.createElement("button");
+      btnRenomear.type = "button";
+      btnRenomear.className = "btn-menu";
+      btnRenomear.textContent = "Renomear";
+      if (protegido) {
+        btnRenomear.disabled = true;
+        btnRenomear.title = "Arquivo protegido";
+      } else {
         btnRenomear.addEventListener("click", (e) => {
           e.stopPropagation();
           renomearItem(item.caminho);
         });
-        acoes.appendChild(btnRenomear);
+      }
+      acoes.appendChild(btnRenomear);
 
-        const btnDeletar = document.createElement("button");
-        btnDeletar.type = "button";
-        btnDeletar.className = "btn-menu deletar";
-        btnDeletar.textContent = "Deletar";
+      const btnDeletar = document.createElement("button");
+      btnDeletar.type = "button";
+      btnDeletar.className = "btn-menu deletar";
+      btnDeletar.textContent = "Deletar";
+      if (protegido) {
+        btnDeletar.disabled = true;
+        btnDeletar.title = "Arquivo protegido";
+      } else {
         btnDeletar.addEventListener("click", (e) => {
           e.stopPropagation();
           deletarItem(item.caminho, item.tipo);
         });
-        acoes.appendChild(btnDeletar);
       }
+      acoes.appendChild(btnDeletar);
     }
 
     li.append(info, acoes);
