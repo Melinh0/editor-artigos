@@ -1367,3 +1367,13 @@ document.addEventListener("keydown", (e) => {
     fecharModalPrompt();
   }
 });
+
+const btnToggleArquivos = document.getElementById("btn-toggle-arquivos");
+if (btnToggleArquivos) {
+  btnToggleArquivos.addEventListener("click", () => {
+    const oculto = painelArquivos.classList.toggle("oculto");
+    btnToggleArquivos.textContent = oculto ? "☰" : "✕";
+    btnToggleArquivos.title = oculto ? "Mostrar painel de arquivos" : "Ocultar painel de arquivos";
+    editor.refresh();
+  });
+}
