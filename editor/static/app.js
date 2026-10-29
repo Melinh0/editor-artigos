@@ -1093,6 +1093,7 @@ async function abrirArtigo(evento, ano, slug) {
     editor.setValue(dados.conteudo);
     sujo = false;
     atualEl.textContent = dados.titulo || dados.slug;
+    document.title = `${dados.titulo || dados.slug} — Editor de Artigos`;
     btnSalvar.disabled = true;
     btnCompilar.disabled = false;
     if (btnDeletarArtigoEl) btnDeletarArtigoEl.disabled = false;
@@ -1319,17 +1320,19 @@ function iniciarEdicaoTitulo() {
 
 function finalizarEdicaoTitulo() {
   if (!editandoTitulo) return;
+  const tituloAnterior = artigoTituloTexto.textContent;
   const novoTitulo = artigoTituloInput.value.trim();
-  if (novoTitulo && novoTitulo !== artigoTituloTexto.textContent) {
-    artigoTituloTexto.textContent = novoTitulo;
-    // Atualizar no backend
+  if (novoTitulo && novoTitulo !== tituloAnterior) {
     api(`/api/artigos/${eventoAtual}/${anoAtual}/${slugAtual}`, {
       method: "PUT",
       body: JSON.stringify({ titulo: novoTitulo }),
-    }).catch(e => {
+    }).then(() => {
+      artigoTituloTexto.textContent = novoTitulo;
+      document.title = `${novoTitulo} — Editor de Artigos`;
+      atualizarTituloNaLista(slugAtual, novoTitulo);
+    }).catch((e) => {
       console.error("Erro ao atualizar título:", e);
-      // Reverter visualmente em caso de erro
-      artigoTituloTexto.textContent = artigoTituloInput.value;
+      indicador("erro ao salvar título");
     });
   }
   artigoTituloInput.classList.add("oculto");
@@ -1370,32 +1373,12 @@ document.addEventListener("click", (e) => {
 
 // Atualizar título na lista de artigos quando editado
 function atualizarTituloNaLista(slug, novoTitulo) {
-  const itemLista = listaEl.querySelector(`[data-slug="${slug}"]`);
+  const itemLista = listaEl.querySelector(`[data-evento="${eventoAtual}"][data-ano="${anoAtual}"][data-slug="${slug}"]`);
   if (itemLista) {
     const tituloEl = itemLista.querySelector(".titulo-item");
     if (tituloEl) tituloEl.textContent = novoTitulo;
   }
 }
-
-// Interceptar PUT de artigo para atualizar título na lista
-const originalApi = api;
-api = async function(caminho, opcoes = {}) {
-  const resultado = await originalApi(caminho, opcoes);
-  // Se for PUT no artigo e tiver título, atualizar na lista
-  if (opcoes.method === "PUT" && caminho.includes("/api/artigos/") && opcoes.body) {
-    try {
-      const body = JSON.parse(opcoes.body);
-      if (body.titulo && slugAtual) {
-        // Extrair slug do caminho
-        const match = caminho.match(/\/api\/artigos\/[^/]+\/[^/]+\/([^/]+)/);
-        if (match) {
-          atualizarTituloNaLista(match[1], body.titulo);
-        }
-      }
-    } catch (e) {}
-  }
-  return resultado;
-};
 
 // Event listeners do painel de arquivos
 btnNovaPasta.addEventListener("click", criarPasta);

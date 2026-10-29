@@ -39,7 +39,7 @@ class ArtigoNovo(BaseModel):
 
 
 class ArtigoConteudo(BaseModel):
-    conteudo: str = Field(min_length=1)
+    conteudo: str | None = Field(default=None, min_length=1)
     titulo: str | None = Field(default=None, max_length=300)
 
 
@@ -387,7 +387,8 @@ def salvar_artigo(evento: str, ano: str, slug: str, artigo: ArtigoConteudo) -> d
     if not caminho.is_file():
         raise HTTPException(status_code=404, detail="Artigo nao encontrado.")
     caminho.parent.mkdir(parents=True, exist_ok=True)
-    _escrever_texto(caminho, artigo.conteudo)
+    if artigo.conteudo is not None:
+        _escrever_texto(caminho, artigo.conteudo)
     meta_caminho = caminho.parent / "artigo.meta.json"
     if meta_caminho.is_file():
         with open(meta_caminho, "r", encoding="utf-8") as f:
