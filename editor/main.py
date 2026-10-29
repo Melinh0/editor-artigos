@@ -40,6 +40,7 @@ class ArtigoNovo(BaseModel):
 
 class ArtigoConteudo(BaseModel):
     conteudo: str = Field(min_length=1)
+    titulo: str | None = Field(default=None, max_length=300)
 
 
 def _validar_slug(slug: str) -> str:
@@ -391,6 +392,8 @@ def salvar_artigo(evento: str, ano: str, slug: str, artigo: ArtigoConteudo) -> d
     if meta_caminho.is_file():
         with open(meta_caminho, "r", encoding="utf-8") as f:
             meta = json.load(f)
+        if artigo.titulo is not None:
+            meta["titulo"] = artigo.titulo
         meta["atualizado_em"] = time.strftime("%Y-%m-%d")
         with open(meta_caminho, "w", encoding="utf-8") as f:
             json.dump(meta, f, ensure_ascii=False, indent=2)

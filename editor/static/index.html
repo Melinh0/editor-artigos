@@ -60,7 +60,10 @@
     <header id="barra">
       <div class="barra-esquerda">
         <button id="btn-toggle-lateral" class="botao" type="button" title="Alternar painel lateral">☰</button>
-        <span id="artigo-atual">Nenhum artigo aberto</span>
+        <div class="artigo-titulo-container" title="Clique para editar o título">
+          <span id="artigo-atual" class="artigo-titulo-texto">Nenhum artigo aberto</span>
+          <input id="artigo-titulo-input" class="artigo-titulo-input oculto" type="text" aria-label="Título do artigo">
+        </div>
       </div>
       <div class="acoes">
         <span id="indicador" class="oculto"></span>

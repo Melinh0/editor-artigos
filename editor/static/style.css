@@ -531,6 +531,112 @@ main {
   white-space: nowrap;
 }
 
+/* Título do artigo editável */
+.artigo-titulo-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.artigo-titulo-texto {
+  font-weight: 600;
+  color: var(--texto-forte);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 300px;
+}
+
+.artigo-titulo-input {
+  flex: 1;
+  min-width: 150px;
+  max-width: 300px;
+  padding: 4px 8px;
+  background: var(--fundo-3);
+  border: 1px solid var(--acento);
+  border-radius: 4px;
+  color: var(--texto);
+  font: inherit;
+  font-weight: 600;
+}
+
+.artigo-titulo-input:focus {
+  outline: none;
+  border-color: var(--acento);
+  box-shadow: 0 0 0 2px rgba(47, 111, 238, 0.2);
+}
+
+/* Dropdown de três pontos para arquivos */
+.menu-arquivo {
+  position: relative;
+  display: inline-block;
+}
+
+.btn-three-dots {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  color: var(--texto-fraco);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.btn-three-dots:hover {
+  background: var(--fundo-2);
+  border-color: var(--acento);
+  color: var(--texto-forte);
+}
+
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  min-width: 140px;
+  background: var(--fundo-2);
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  z-index: 10;
+  display: none;
+  flex-direction: column;
+}
+
+.dropdown-menu.ativo {
+  display: flex;
+}
+
+.dropdown-menu button {
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  color: var(--texto);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.dropdown-menu button:hover {
+  background: var(--fundo-3);
+}
+
+.dropdown-menu button.deletar {
+  color: var(--erro);
+}
+
+.dropdown-menu button.deletar:hover {
+  background: rgba(201, 42, 74, 0.1);
+}
+
 .acoes {
   display: flex;
   align-items: center;

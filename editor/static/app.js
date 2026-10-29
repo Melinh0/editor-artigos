@@ -851,57 +851,86 @@ function renderizarArquivos(itens) {
       });
       acoes.appendChild(btnAbrir);
     } else {
+      // Dropdown de três pontos para ações de arquivo
+      const menuArquivo = document.createElement("div");
+      menuArquivo.className = "menu-arquivo";
+
+      const btnThreeDots = document.createElement("button");
+      btnThreeDots.type = "button";
+      btnThreeDots.className = "btn-three-dots";
+      btnThreeDots.title = "Mais ações";
+      btnThreeDots.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>`;
+      btnThreeDots.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const dropdown = menuArquivo.querySelector(".dropdown-menu");
+        if (dropdown) {
+          // Fechar outros dropdowns abertos
+          document.querySelectorAll(".dropdown-menu.ativo").forEach(d => {
+            if (d !== dropdown) d.classList.remove("ativo");
+          });
+          dropdown.classList.toggle("ativo");
+        }
+      });
+      menuArquivo.appendChild(btnThreeDots);
+
+      const dropdownMenu = document.createElement("div");
+      dropdownMenu.className = "dropdown-menu";
+
       if (tipo === "texto") {
         const btnEditar = document.createElement("button");
         btnEditar.type = "button";
-        btnEditar.className = "btn-menu";
         btnEditar.textContent = "Editar";
         btnEditar.addEventListener("click", (e) => {
           e.stopPropagation();
+          dropdownMenu.classList.remove("ativo");
           editarArquivoTexto(item.caminho);
         });
-        acoes.appendChild(btnEditar);
+        dropdownMenu.appendChild(btnEditar);
       } else if (tipo === "imagem") {
         const btnVer = document.createElement("button");
         btnVer.type = "button";
-        btnVer.className = "btn-menu";
         btnVer.textContent = "Visualizar";
         btnVer.addEventListener("click", (e) => {
           e.stopPropagation();
+          dropdownMenu.classList.remove("ativo");
           abrirModalImagem(item.caminho, item.tamanho);
         });
-        acoes.appendChild(btnVer);
+        dropdownMenu.appendChild(btnVer);
       }
 
       const btnBaixar = document.createElement("button");
       btnBaixar.type = "button";
-      btnBaixar.className = "btn-menu";
       btnBaixar.textContent = "Baixar";
       btnBaixar.addEventListener("click", (e) => {
         e.stopPropagation();
+        dropdownMenu.classList.remove("ativo");
         baixarArquivo(item.caminho);
       });
-      acoes.appendChild(btnBaixar);
+      dropdownMenu.appendChild(btnBaixar);
 
       const btnRenomear = document.createElement("button");
       btnRenomear.type = "button";
-      btnRenomear.className = "btn-menu";
       btnRenomear.textContent = "Renomear";
       btnRenomear.addEventListener("click", (e) => {
         e.stopPropagation();
+        dropdownMenu.classList.remove("ativo");
         renomearItem(item.caminho);
       });
-      acoes.appendChild(btnRenomear);
+      dropdownMenu.appendChild(btnRenomear);
 
       const btnDeletar = document.createElement("button");
       btnDeletar.type = "button";
-      btnDeletar.className = "btn-menu deletar";
+      btnDeletar.className = "deletar";
       btnDeletar.textContent = "Deletar";
       btnDeletar.addEventListener("click", (e) => {
         e.stopPropagation();
+        dropdownMenu.classList.remove("ativo");
         deletarItem(item.caminho, item.tipo);
       });
-      acoes.appendChild(btnDeletar);
+      dropdownMenu.appendChild(btnDeletar);
+
+      menuArquivo.appendChild(dropdownMenu);
+      acoes.appendChild(menuArquivo);
     }
 
     li.append(info, acoes);
@@ -1270,6 +1299,103 @@ window.addEventListener("beforeunload", (e) => {
     e.returnValue = "";
   }
 });
+
+// Título do artigo editável
+const artigoTituloContainer = document.querySelector(".artigo-titulo-container");
+const artigoTituloTexto = document.getElementById("artigo-atual");
+const artigoTituloInput = document.getElementById("artigo-titulo-input");
+
+let editandoTitulo = false;
+
+function iniciarEdicaoTitulo() {
+  if (editandoTitulo || !slugAtual) return;
+  editandoTitulo = true;
+  artigoTituloTexto.classList.add("oculto");
+  artigoTituloInput.value = artigoTituloTexto.textContent;
+  artigoTituloInput.classList.remove("oculto");
+  artigoTituloInput.focus();
+  artigoTituloInput.select();
+}
+
+function finalizarEdicaoTitulo() {
+  if (!editandoTitulo) return;
+  const novoTitulo = artigoTituloInput.value.trim();
+  if (novoTitulo && novoTitulo !== artigoTituloTexto.textContent) {
+    artigoTituloTexto.textContent = novoTitulo;
+    // Atualizar no backend
+    api(`/api/artigos/${eventoAtual}/${anoAtual}/${slugAtual}`, {
+      method: "PUT",
+      body: JSON.stringify({ titulo: novoTitulo }),
+    }).catch(e => {
+      console.error("Erro ao atualizar título:", e);
+      // Reverter visualmente em caso de erro
+      artigoTituloTexto.textContent = artigoTituloInput.value;
+    });
+  }
+  artigoTituloInput.classList.add("oculto");
+  artigoTituloTexto.classList.remove("oculto");
+  editandoTitulo = false;
+}
+
+if (artigoTituloContainer) {
+  artigoTituloContainer.addEventListener("click", (e) => {
+    if (e.target === artigoTituloContainer || e.target === artigoTituloTexto) {
+      iniciarEdicaoTitulo();
+    }
+  });
+}
+
+if (artigoTituloInput) {
+  artigoTituloInput.addEventListener("blur", finalizarEdicaoTitulo);
+  artigoTituloInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      finalizarEdicaoTitulo();
+    }
+    if (e.key === "Escape") {
+      e.preventDefault();
+      artigoTituloInput.classList.add("oculto");
+      artigoTituloTexto.classList.remove("oculto");
+      editandoTitulo = false;
+    }
+  });
+}
+
+// Fechar dropdowns ao clicar fora
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".menu-arquivo")) {
+    document.querySelectorAll(".dropdown-menu.ativo").forEach(d => d.classList.remove("ativo"));
+  }
+});
+
+// Atualizar título na lista de artigos quando editado
+function atualizarTituloNaLista(slug, novoTitulo) {
+  const itemLista = listaEl.querySelector(`[data-slug="${slug}"]`);
+  if (itemLista) {
+    const tituloEl = itemLista.querySelector(".titulo-item");
+    if (tituloEl) tituloEl.textContent = novoTitulo;
+  }
+}
+
+// Interceptar PUT de artigo para atualizar título na lista
+const originalApi = api;
+api = async function(caminho, opcoes = {}) {
+  const resultado = await originalApi(caminho, opcoes);
+  // Se for PUT no artigo e tiver título, atualizar na lista
+  if (opcoes.method === "PUT" && caminho.includes("/api/artigos/") && opcoes.body) {
+    try {
+      const body = JSON.parse(opcoes.body);
+      if (body.titulo && slugAtual) {
+        // Extrair slug do caminho
+        const match = caminho.match(/\/api\/artigos\/[^/]+\/[^/]+\/([^/]+)/);
+        if (match) {
+          atualizarTituloNaLista(match[1], body.titulo);
+        }
+      }
+    } catch (e) {}
+  }
+  return resultado;
+};
 
 // Event listeners do painel de arquivos
 btnNovaPasta.addEventListener("click", criarPasta);
